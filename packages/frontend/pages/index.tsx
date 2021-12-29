@@ -1,104 +1,77 @@
-import { Box, Button, Divider, Heading, Input, Text } from '@chakra-ui/react'
-import { ChainId, useEthers, useSendTransaction } from '@usedapp/core'
-import { ethers, providers, utils } from 'ethers'
-import React, { useReducer } from 'react'
-import { YourContract as LOCAL_CONTRACT_ADDRESS } from '../artifacts/contracts/contractAddress'
-import YourContract from '../artifacts/contracts/YourContract.sol/YourContract.json'
+import { AspectRatio, Flex, Heading, VStack } from '@chakra-ui/react'
+import { ethers } from 'ethers'
+import React from 'react'
+import { CheesecakePortalContract as LOCAL_CONTRACT_ADDRESS } from '../artifacts/contracts/contractAddress'
+import CheesecakePortal from '../artifacts/contracts/CheesecakePortal.sol/CheesecakePortal.json'
 import { Layout } from '../components/layout/Layout'
-import { YourContract as YourContractType } from '../types/typechain'
+import { CheesecakePortal as CheesecakePortalContractType } from '../types/typechain'
+import { ChainId, useEthers } from '@usedapp/core'
+import { Donation } from '../types/donation'
+import DonationItem from '../components/DonationItem'
+import { filter } from '../lib/utils'
+import CakeOrderSheet, { PRICES } from 'components/CakeOrderSheet'
+import Image from 'components/Image'
 
 /**
  * Constants & Helpers
  */
 
-const localProvider = new providers.StaticJsonRpcProvider(
-  'http://localhost:8545'
-)
-
-const ROPSTEN_CONTRACT_ADDRESS = '0x6b61a52b1EA15f4b8dB186126e980208E1E18864'
-
-/**
- * Prop Types
- */
-type StateType = {
-  greeting: string
-  inputValue: string
-  isLoading: boolean
-}
-type ActionType =
-  | {
-      type: 'SET_GREETING'
-      greeting: StateType['greeting']
-    }
-  | {
-      type: 'SET_INPUT_VALUE'
-      inputValue: StateType['inputValue']
-    }
-  | {
-      type: 'SET_LOADING'
-      isLoading: StateType['isLoading']
-    }
-
-/**
- * Component
- */
-const initialState: StateType = {
-  greeting: '',
-  inputValue: '',
-  isLoading: false,
-}
-
-function reducer(state: StateType, action: ActionType): StateType {
-  switch (action.type) {
-    // Track the greeting from the blockchain
-    case 'SET_GREETING':
-      return {
-        ...state,
-        greeting: action.greeting,
-      }
-    case 'SET_INPUT_VALUE':
-      return {
-        ...state,
-        inputValue: action.inputValue,
-      }
-    case 'SET_LOADING':
-      return {
-        ...state,
-        isLoading: action.isLoading,
-      }
-    default:
-      throw new Error()
-  }
-}
+const MUMBAI_CONTRACT_ADDRESS = '0xBC281AC19947790c1cDF0Dc2cf09B795c246baA0'
+const POLYGON_CONTRACT_ADDRESS = 'TBC' // todo
 
 function HomeIndex(): JSX.Element {
-  const [state, dispatch] = useReducer(reducer, initialState)
+  const [isLoading, setIsLoading] = React.useState(false)
+  const [donations, setDonations] = React.useState<Donation[]>([])
+
   const { account, chainId, library } = useEthers()
+
+  let CONTRACT_ADDRESS = React.useMemo(() => {
+    console.log({ chainId })
+    console.log({ account })
+    console.log({ library })
+    switch (chainId) {
+      case ChainId.Localhost || ChainId.Hardhat:
+        return LOCAL_CONTRACT_ADDRESS
+      case ChainId.Mumbai:
+        return MUMBAI_CONTRACT_ADDRESS
+      case ChainId.Polygon:
+        return POLYGON_CONTRACT_ADDRESS
+      default:
+        return LOCAL_CONTRACT_ADDRESS
+    }
+  }, [ChainId, account])
+
+  const contract = React.useMemo(() => {
+    if (!library) {
+      return null
+    }
+    return new ethers.Contract(
+      CONTRACT_ADDRESS,
+      CheesecakePortal.abi,
+      library.getSigner()
+    ) as CheesecakePortalContractType
+  }, [chainId, library, CONTRACT_ADDRESS])
 
   const isLocalChain =
     chainId === ChainId.Localhost || chainId === ChainId.Hardhat
 
-  const CONTRACT_ADDRESS =
-    chainId === ChainId.Ropsten
-      ? ROPSTEN_CONTRACT_ADDRESS
-      : LOCAL_CONTRACT_ADDRESS
-
-  // Use the localProvider as the signer to send ETH to our wallet
-  const { sendTransaction } = useSendTransaction({
-    signer: localProvider.getSigner(),
-  })
-
-  // call the smart contract, read the current greeting value
-  async function fetchContractGreeting() {
+  const fetchAllDonations = async () => {
     if (library) {
-      const contract = new ethers.Contract(
-        CONTRACT_ADDRESS,
-        YourContract.abi,
-        library
-      ) as YourContractType
       try {
-        const data = await contract.greeting()
-        dispatch({ type: 'SET_GREETING', greeting: data })
+        const data = await contract.getAllDonations()
+
+        // Sort data by timestamp
+        const sortedData = data
+          .slice()
+          .map((x) => ({
+            ...x,
+            name: filter.clean(x.name),
+            message: filter.clean(x.message),
+          }))
+          .sort((a, b) => {
+            return b.timestamp.toNumber() - a.timestamp.toNumber()
+          })
+        setDonations(sortedData)
       } catch (err) {
         // eslint-disable-next-line no-console
         console.log('Error: ', err)
@@ -106,97 +79,94 @@ function HomeIndex(): JSX.Element {
     }
   }
 
-  // call the smart contract, send an update
-  async function setContractGreeting() {
-    if (!state.inputValue) return
+  async function sendCheesecake(
+    cakeSize: 'small' | 'medium' | 'large',
+    name: string,
+    message: string
+  ) {
     if (library) {
-      dispatch({
-        type: 'SET_LOADING',
-        isLoading: true,
-      })
-      const signer = library.getSigner()
-      const contract = new ethers.Contract(
-        CONTRACT_ADDRESS,
-        YourContract.abi,
-        signer
-      ) as YourContractType
-      const transaction = await contract.setGreeting(state.inputValue)
-      await transaction.wait()
-      fetchContractGreeting()
-      dispatch({
-        type: 'SET_LOADING',
-        isLoading: false,
-      })
+      setIsLoading(true)
+      let ethersAmount: number
+      switch (cakeSize) {
+        case 'small':
+          ethersAmount = PRICES.small
+          break
+        case 'medium':
+          ethersAmount = PRICES.medium
+          break
+        case 'large':
+          ethersAmount = PRICES.large
+          break
+        default:
+          break
+      }
+
+      try {
+        console.log(
+          `Client side sending over ${ethersAmount} ethers = ${ethers.utils.parseEther(
+            ethersAmount.toString()
+          )} WEI`
+        )
+        const transaction = await contract.sendCheesecake(
+          message,
+          name,
+          cakeSize,
+          ethers.utils.parseEther(ethersAmount.toString())
+          //   ethers.utils.parseEther('10000000')
+        )
+        await transaction.wait()
+        await fetchAllDonations()
+      } catch (error) {
+        console.error(error)
+      }
+
+      setIsLoading(false)
     }
   }
 
-  function sendFunds(): void {
-    sendTransaction({
-      to: account,
-      value: utils.parseEther('0.1'),
-    })
-  }
+  React.useEffect(() => {
+    fetchAllDonations()
+  }, [library, fetchAllDonations])
 
   return (
     <Layout>
-      <Heading as="h1" mb="8">
-        Next.js Ethereum Starter
-      </Heading>
-      <Button
-        as="a"
-        size="lg"
-        colorScheme="teal"
-        variant="outline"
-        href="https://github.com/austintgriffith/scaffold-eth/tree/nextjs-typescript"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        Get the source code!
-      </Button>
-      <Text mt="8" fontSize="xl">
-        This page only works on the ROPSTEN Testnet or on a Local Chain.
-      </Text>
-      <Box maxWidth="container.sm" p="8" mt="8" bg="gray.100">
-        <Text fontSize="xl">Contract Address: {CONTRACT_ADDRESS}</Text>
-        <Divider my="8" borderColor="gray.400" />
-        <Box>
-          <Text fontSize="lg">Greeting: {state.greeting}</Text>
-          <Button mt="2" colorScheme="teal" onClick={fetchContractGreeting}>
-            Fetch Greeting
-          </Button>
-        </Box>
-        <Divider my="8" borderColor="gray.400" />
-        <Box>
-          <Input
-            bg="white"
-            type="text"
-            placeholder="Enter a Greeting"
-            onChange={(e) => {
-              dispatch({
-                type: 'SET_INPUT_VALUE',
-                inputValue: e.target.value,
-              })
-            }}
+      <VStack alignItems="center" mb={8} height="full">
+        <AspectRatio ratio={1} width="6rem">
+          <Image
+            transition="ease-out"
+            transitionProperty="all"
+            transitionDuration="normal"
+            src="/images/Cheesecake.svg"
+            alt="Image of a cheesecake"
+            layout="fill"
+            objectFit="contain"
           />
-          <Button
-            mt="2"
-            colorScheme="teal"
-            isLoading={state.isLoading}
-            onClick={setContractGreeting}
-          >
-            Set Greeting
-          </Button>
-        </Box>
-        <Divider my="8" borderColor="gray.400" />
-        <Text mb="4">This button only works on a Local Chain.</Text>
-        <Button
-          colorScheme="teal"
-          onClick={sendFunds}
-          isDisabled={!isLocalChain}
+        </AspectRatio>
+        <Heading as="h1" fontSize="3xl">
+          Send Xing Xiang a Cheescake!
+        </Heading>
+      </VStack>
+      <Flex
+        w="full"
+        justifyContent="space-around"
+        alignItems="center"
+        maxWidth="container.lg"
+      >
+        {/* Form */}
+        <CakeOrderSheet sendCheesecake={sendCheesecake} isLoading={isLoading} />
+
+        <VStack
+          spacing={0}
+          pl={2}
+          maxHeight="50vh"
+          overflowY="auto"
+          alignItems="flex-start"
         >
-          Send Funds From Local Hardhat Chain
-        </Button>
-      </Box>
+          {donations.map((donation, index) => (
+            <DonationItem key={index} item={donation} />
+          ))}
+        </VStack>
+      </Flex>
     </Layout>
   )
 }

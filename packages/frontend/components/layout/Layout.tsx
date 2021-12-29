@@ -7,6 +7,8 @@ import {
   Button,
   Container,
   Flex,
+  HStack,
+  Icon,
   Image,
   Link,
   Menu,
@@ -24,6 +26,8 @@ import { getErrorMessage } from '../../lib/utils'
 import { Balance } from '../Balance'
 import { ConnectWallet } from '../ConnectWallet'
 import { Head, MetaProps } from './Head'
+
+import { FiGithub } from 'react-icons/fi'
 
 // Extends `window` to add `ethereum`.
 declare global {
@@ -68,7 +72,7 @@ export const Layout = ({ children, customMeta }: LayoutProps): JSX.Element => {
   }
 
   return (
-    <>
+    <Box height="full" bg="teal.50" minH="100vh">
       <Head customMeta={customMeta} />
       <header>
         <Container maxWidth="container.xl">
@@ -82,16 +86,6 @@ export const Layout = ({ children, customMeta }: LayoutProps): JSX.Element => {
               <NextLink href="/" passHref>
                 <Link px="4" py="1">
                   Home
-                </Link>
-              </NextLink>
-              <NextLink href="/graph-example" passHref>
-                <Link px="4" py="1">
-                  Graph Example
-                </Link>
-              </NextLink>
-              <NextLink href="/signature-example" passHref>
-                <Link px="4" py="1">
-                  Signature Example
                 </Link>
               </NextLink>
             </Flex>
@@ -125,7 +119,12 @@ export const Layout = ({ children, customMeta }: LayoutProps): JSX.Element => {
         </Container>
       </header>
       <main>
-        <Container maxWidth="container.xl">
+        <Flex
+          maxWidth="container.xl"
+          alignItems="center"
+          flexDir="column"
+          mx="auto"
+        >
           {error && (
             <Alert status="error" mb="8">
               <AlertIcon />
@@ -160,16 +159,18 @@ export const Layout = ({ children, customMeta }: LayoutProps): JSX.Element => {
               </Alert>
             )
           })}
-        </Container>
+        </Flex>
       </main>
       <footer>
-        <Container mt="8" py="8" maxWidth="container.xl">
-          <Text>
-            Built by{' '}
-            <Link href="https://twitter.com/huntarosan">Hunter Chang</Link>
-          </Text>
+        <Container mt="8" py="8" maxWidth="container.xl" centerContent>
+          <Link href="https://github.com/kingstarfly" isExternal>
+            <HStack>
+              <Icon as={FiGithub} mx="0.2rem" />
+              <Text>Github</Text>
+            </HStack>
+          </Link>
         </Container>
       </footer>
-    </>
+    </Box>
   )
 }

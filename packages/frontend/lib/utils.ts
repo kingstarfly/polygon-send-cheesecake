@@ -3,7 +3,9 @@ import {
   NoEthereumProviderError,
   UserRejectedRequestError as UserRejectedRequestErrorInjected,
 } from '@web3-react/injected-connector'
-import { UserRejectedRequestError as UserRejectedRequestErrorWalletConnect } from '@web3-react/walletconnect-connector'
+import Filter from 'bad-words'
+
+// import { UserRejectedRequestError as UserRejectedRequestErrorWalletConnect } from '@web3-react/walletconnect-connector'
 
 // From https://github.com/NoahZinsmeister/web3-react/blob/v6/example/pages/index.tsx
 // Parses the possible errors provided by web3-react
@@ -13,8 +15,8 @@ export function getErrorMessage(error: Error): string {
   } else if (error instanceof UnsupportedChainIdError) {
     return "You're connected to an unsupported network."
   } else if (
-    error instanceof UserRejectedRequestErrorInjected ||
-    error instanceof UserRejectedRequestErrorWalletConnect
+    error instanceof UserRejectedRequestErrorInjected
+    // error instanceof UserRejectedRequestErrorWalletConnect
   ) {
     return 'Please authorize this website to access your Ethereum account.'
   } else {
@@ -22,3 +24,12 @@ export function getErrorMessage(error: Error): string {
     return 'An unknown error occurred. Check the console for more details.'
   }
 }
+
+export const capWord = (s: string) => {
+  if (!s || s.length === 0) {
+    return
+  }
+  return s[0].toLocaleUpperCase() + s.slice(1)
+}
+
+export const filter = new Filter()

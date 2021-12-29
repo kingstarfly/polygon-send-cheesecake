@@ -27,9 +27,9 @@ export const Head = ({
 }): JSX.Element => {
   const router = useRouter()
   const meta: MetaProps = {
-    title: 'Next.js Ethereum Starter',
-    description: 'Ethers.js - Hardhat - Next.js - Typescript',
-    image: `${WEBSITE_HOST_URL}/images/site-preview.png`,
+    title: 'Send XX a Cheesecake',
+    description: 'Just one will do :)',
+    // image: `/images/site-preview.png`,
     type: 'website',
     ...customMeta,
   }
@@ -40,13 +40,13 @@ export const Head = ({
       <meta content={meta.description} name="description" />
       <meta property="og:url" content={`${WEBSITE_HOST_URL}${router.asPath}`} />
       <link rel="canonical" href={`${WEBSITE_HOST_URL}${router.asPath}`} />
+      <link rel="shortcut icon" href="/favicon.ico" />
       <meta property="og:type" content={meta.type} />
-      <meta property="og:site_name" content="Next.js Ethereum Starter" />
+      <meta property="og:site_name" content="Send XX a Cheesecake" />
       <meta property="og:description" content={meta.description} />
       <meta property="og:title" content={meta.title} />
       <meta property="og:image" content={meta.image} />
       <meta name="twitter:card" content="summary_large_image" />
-      <meta name="twitter:site" content="@huntarosan" />
       <meta name="twitter:title" content={meta.title} />
       <meta name="twitter:description" content={meta.description} />
       <meta name="twitter:image" content={meta.image} />

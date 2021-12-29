@@ -1,12 +1,14 @@
 {
-  "name": "nextjs-ethereum-starter-hardhat",
-  "author": "@huntarosan",
+  "name": "hardhat",
+  "author": "@kingstarfly",
   "license": "MIT",
   "version": "1.0.0",
   "scripts": {
     "chain": "npx hardhat node",
     "compile": "npx hardhat compile",
-    "deploy": "npx hardhat run scripts/deploy.ts --network localhost"
+    "deploy:hardhat": "npx hardhat clean && npx hardhat run scripts/deploy.ts --network hardhat",
+    "deploy:mumbai": "npx hardhat clean && npx hardhat run scripts/deploy.ts --network mumbai",
+    "deploy:polygon": "npx hardhat clean && npx hardhat run scripts/deploy.ts --network polygon"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.2",

@@ -3,9 +3,10 @@
 //
 // When running the script with `hardhat run <script>` you'll find the Hardhat
 // Runtime Environment's members available in the global scope.
-import { Contract } from 'ethers';
-import { config, ethers } from 'hardhat';
-import fs from 'fs';
+import { Contract } from "ethers";
+import { config, ethers } from "hardhat";
+import fs from "fs";
+import path from "path";
 
 async function main() {
   // Hardhat always runs the compile task when running scripts with its command
@@ -15,20 +16,25 @@ async function main() {
   // manually to make sure everything is compiled
   // await hre.run('compile');
 
-  fs.unlinkSync(`${config.paths.artifacts}/contracts/contractAddress.ts`);
+  //   fs.unlinkSync(
+  //     path.join(config.paths.artifacts, "contracts", "contractAddress.ts")
+  //   );
 
   // We get the contract to deploy
-  const YourContract = await ethers.getContractFactory('YourContract');
-  const contract = await YourContract.deploy('Hello, Hardhat!');
+  const CheesecakePortalContract = await ethers.getContractFactory(
+    "CheesecakePortal"
+  );
+  const contract = await CheesecakePortalContract.deploy();
   await contract.deployed();
-  saveFrontendFiles(contract, "YourContract");
-  console.log('YourContract deployed to:', contract.address);
+  saveFrontendFiles(contract, "CheesecakePortalContract");
+  console.log("CheesecakePortalContract deployed to:", contract.address);
 
-  const MulticallContract = await ethers.getContractFactory('Multicall');
+  // Deploy multicall for local chain development - required for useDapp.
+  const MulticallContract = await ethers.getContractFactory("Multicall");
   const multicallContract = await MulticallContract.deploy();
   await multicallContract.deployed();
   saveFrontendFiles(multicallContract, "MulticallContract");
-  console.log('Multicall deployed to:', multicallContract.address);
+  console.log("Multicall deployed to:", multicallContract.address);
 }
 
 // https://github.com/nomiclabs/hardhat-hackathon-boilerplate/blob/master/scripts/deploy.js
