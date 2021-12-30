@@ -173,7 +173,7 @@ function HomeIndex(): JSX.Element {
 
         <VStack
           spacing={0}
-          pl={2}
+          pl={4}
           height="full"
           overflowY="auto"
           alignItems="flex-start"
