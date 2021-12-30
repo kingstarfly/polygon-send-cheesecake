@@ -18,7 +18,7 @@ export function getErrorMessage(error: Error): string {
     error instanceof UserRejectedRequestErrorInjected
     // error instanceof UserRejectedRequestErrorWalletConnect
   ) {
-    return 'Please authorize this website to access your Ethereum account.'
+    return 'Please authorize this website to access your Polygon account.'
   } else {
     console.error(error)
     return 'An unknown error occurred. Check the console for more details.'

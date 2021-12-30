@@ -161,29 +161,37 @@ function HomeIndex(): JSX.Element {
           Send Xing Xiang a Cheescake!
         </Heading>
       </VStack>
-      <Flex
-        w="full"
-        justifyContent="space-around"
-        alignItems="center"
-        maxWidth="container.lg"
-        height="80vh"
-      >
-        {/* Form */}
-        <CakeOrderSheet sendCheesecake={sendCheesecake} isLoading={isLoading} />
 
-        <VStack
-          spacing={0}
-          pl={4}
-          height="full"
-          overflowY="auto"
-          alignItems="flex-start"
+      {library ? (
+        <Flex
+          w="full"
+          justifyContent="space-around"
+          alignItems="center"
+          maxWidth="container.lg"
+          height="80vh"
         >
-          {donations.map((donation, index) => (
-            <DonationItem key={index} item={donation} />
-          ))}
-          <DonationItem />
-        </VStack>
-      </Flex>
+          {/* Form */}
+          <CakeOrderSheet
+            sendCheesecake={sendCheesecake}
+            isLoading={isLoading}
+          />
+
+          <VStack
+            spacing={0}
+            pl={4}
+            height="full"
+            overflowY="auto"
+            alignItems="flex-start"
+          >
+            {donations.map((donation, index) => (
+              <DonationItem key={index} item={donation} />
+            ))}
+            <DonationItem />
+          </VStack>
+        </Flex>
+      ) : (
+        <Heading my="auto">Please connect to a wallet to continue</Heading>
+      )}
     </Layout>
   )
 }

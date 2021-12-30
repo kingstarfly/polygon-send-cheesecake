@@ -124,6 +124,7 @@ export const Layout = ({ children, customMeta }: LayoutProps): JSX.Element => {
           alignItems="center"
           flexDir="column"
           mx="auto"
+          minHeight="70vh"
         >
           {error && (
             <Alert status="error" mb="8">
