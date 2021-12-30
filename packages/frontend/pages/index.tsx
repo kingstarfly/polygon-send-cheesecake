@@ -151,9 +151,6 @@ function HomeIndex(): JSX.Element {
       <VStack alignItems="center" mb={8} height="full">
         <AspectRatio ratio={1} width="6rem">
           <Image
-            transition="ease-out"
-            transitionProperty="all"
-            transitionDuration="normal"
             src="/images/Cheesecake.svg"
             alt="Image of a cheesecake"
             layout="fill"
