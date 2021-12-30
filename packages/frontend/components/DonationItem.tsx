@@ -3,7 +3,6 @@ import React from 'react'
 import { Donation } from '../types/donation'
 import { fromUnixTime, formatDistanceToNow } from 'date-fns'
 import { VStack, Text, Divider, HStack, Circle, Box } from '@chakra-ui/react'
-import { capWord } from 'lib/utils'
 
 interface Props {
   item: Donation
@@ -14,6 +13,12 @@ const displayDate = (ts: BigNumberish) => {
   const date = fromUnixTime(unix)
   const display = formatDistanceToNow(date, { addSuffix: true })
   return display
+}
+
+const mapping = {
+  0: 'Small',
+  1: 'Medium',
+  2: 'Large',
 }
 
 const DonationItem = ({ item }: Props) => {
@@ -48,7 +53,7 @@ const DonationItem = ({ item }: Props) => {
             {displayDate(item.timestamp)}
           </Text>
           <Text fontSize="sm" fontWeight="semibold" alignSelf="flex-start">
-            {item.name} sent a {capWord(item.cakeSize)} Cheesecake
+            {item.name} sent a {mapping[item.cakeSize.toNumber()]} Cheesecake
           </Text>
         </VStack>
 

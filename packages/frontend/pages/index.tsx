@@ -11,12 +11,13 @@ import DonationItem from '../components/DonationItem'
 import { filter } from '../lib/utils'
 import CakeOrderSheet, { PRICES } from 'components/CakeOrderSheet'
 import Image from 'components/Image'
+import { CakeSize } from 'components/CakeSizeChoice'
 
 /**
  * Constants & Helpers
  */
 
-const MUMBAI_CONTRACT_ADDRESS = '0xBC281AC19947790c1cDF0Dc2cf09B795c246baA0'
+const MUMBAI_CONTRACT_ADDRESS = '0x9BcD660f618cD943ba82FEFF939d90F14Af39f16'
 const POLYGON_CONTRACT_ADDRESS = 'TBC' // todo
 
 function HomeIndex(): JSX.Element {
@@ -25,10 +26,7 @@ function HomeIndex(): JSX.Element {
 
   const { account, chainId, library } = useEthers()
 
-  let CONTRACT_ADDRESS = React.useMemo(() => {
-    console.log({ chainId })
-    console.log({ account })
-    console.log({ library })
+  const CONTRACT_ADDRESS = React.useMemo(() => {
     switch (chainId) {
       case ChainId.Localhost || ChainId.Hardhat:
         return LOCAL_CONTRACT_ADDRESS
@@ -52,13 +50,10 @@ function HomeIndex(): JSX.Element {
     ) as CheesecakePortalContractType
   }, [chainId, library, CONTRACT_ADDRESS])
 
-  const isLocalChain =
-    chainId === ChainId.Localhost || chainId === ChainId.Hardhat
-
-  const fetchAllDonations = async () => {
+  const fetchAllDonations = React.useCallback(async () => {
     if (library) {
       try {
-        const data = await contract.getAllDonations()
+        const data = await contract.getAllCheesecakes()
 
         // Sort data by timestamp
         const sortedData = data
@@ -74,45 +69,45 @@ function HomeIndex(): JSX.Element {
         setDonations(sortedData)
       } catch (err) {
         // eslint-disable-next-line no-console
-        console.log('Error: ', err)
+        console.log(err)
       }
     }
-  }
+  }, [contract, setDonations])
 
   async function sendCheesecake(
-    cakeSize: 'small' | 'medium' | 'large',
+    cakeSize: CakeSize,
     name: string,
     message: string
   ) {
     if (library) {
       setIsLoading(true)
       let ethersAmount: number
+      let cakeCountIndex: number
       switch (cakeSize) {
         case 'small':
           ethersAmount = PRICES.small
+          cakeCountIndex = 0
           break
         case 'medium':
           ethersAmount = PRICES.medium
+          cakeCountIndex = 1
           break
         case 'large':
           ethersAmount = PRICES.large
+          cakeCountIndex = 2
           break
         default:
           break
       }
 
       try {
-        console.log(
-          `Client side sending over ${ethersAmount} ethers = ${ethers.utils.parseEther(
-            ethersAmount.toString()
-          )} WEI`
-        )
         const transaction = await contract.sendCheesecake(
           message,
           name,
-          cakeSize,
-          ethers.utils.parseEther(ethersAmount.toString())
-          //   ethers.utils.parseEther('10000000')
+          cakeCountIndex,
+          {
+            value: ethers.utils.parseEther(ethersAmount.toString()),
+          }
         )
         await transaction.wait()
         await fetchAllDonations()

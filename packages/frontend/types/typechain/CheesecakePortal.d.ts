@@ -21,25 +21,25 @@ import type { TypedEventFilter, TypedEvent, TypedListener } from "./common";
 
 interface CheesecakePortalInterface extends ethers.utils.Interface {
   functions: {
-    "getAllDonations()": FunctionFragment;
-    "getQtyCheesecakes()": FunctionFragment;
+    "getAllCheesecakes()": FunctionFragment;
+    "getCakeCount()": FunctionFragment;
     "owner()": FunctionFragment;
-    "sendCheesecake(string,string,string,uint256)": FunctionFragment;
+    "sendCheesecake(string,string,uint256)": FunctionFragment;
     "throwError()": FunctionFragment;
   };
 
   encodeFunctionData(
-    functionFragment: "getAllDonations",
+    functionFragment: "getAllCheesecakes",
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "getQtyCheesecakes",
+    functionFragment: "getCakeCount",
     values?: undefined
   ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "sendCheesecake",
-    values: [string, string, string, BigNumberish]
+    values: [string, string, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "throwError",
@@ -47,11 +47,11 @@ interface CheesecakePortalInterface extends ethers.utils.Interface {
   ): string;
 
   decodeFunctionResult(
-    functionFragment: "getAllDonations",
+    functionFragment: "getAllCheesecakes",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "getQtyCheesecakes",
+    functionFragment: "getCakeCount",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
@@ -62,17 +62,17 @@ interface CheesecakePortalInterface extends ethers.utils.Interface {
   decodeFunctionResult(functionFragment: "throwError", data: BytesLike): Result;
 
   events: {
-    "NewCheesecake(string,string,string,address,uint256)": EventFragment;
+    "NewCheesecake(string,string,uint256,address,uint256)": EventFragment;
   };
 
   getEvent(nameOrSignatureOrTopic: "NewCheesecake"): EventFragment;
 }
 
 export type NewCheesecakeEvent = TypedEvent<
-  [string, string, string, string, BigNumber] & {
+  [string, string, BigNumber, string, BigNumber] & {
     name: string;
     message: string;
-    cakeSize: string;
+    cakeSize: BigNumber;
     from: string;
     timestamp: BigNumber;
   }
@@ -122,83 +122,86 @@ export class CheesecakePortal extends BaseContract {
   interface: CheesecakePortalInterface;
 
   functions: {
-    getAllDonations(
+    getAllCheesecakes(
       overrides?: CallOverrides
     ): Promise<
       [
-        ([string, string, string, string, BigNumber] & {
+        ([string, string, BigNumber, string, BigNumber] & {
           name: string;
           message: string;
-          cakeSize: string;
+          cakeSize: BigNumber;
           giver: string;
           timestamp: BigNumber;
         })[]
       ]
     >;
 
-    getQtyCheesecakes(overrides?: CallOverrides): Promise<[BigNumber]>;
+    getCakeCount(
+      overrides?: CallOverrides
+    ): Promise<[[BigNumber, BigNumber, BigNumber]]>;
 
     owner(overrides?: CallOverrides): Promise<[string]>;
 
     sendCheesecake(
       _message: string,
       _name: string,
-      _cakeSize: string,
-      _payAmountInWei: BigNumberish,
+      _cakeSize: BigNumberish,
       overrides?: PayableOverrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
     throwError(overrides?: CallOverrides): Promise<[void]>;
   };
 
-  getAllDonations(
+  getAllCheesecakes(
     overrides?: CallOverrides
   ): Promise<
-    ([string, string, string, string, BigNumber] & {
+    ([string, string, BigNumber, string, BigNumber] & {
       name: string;
       message: string;
-      cakeSize: string;
+      cakeSize: BigNumber;
       giver: string;
       timestamp: BigNumber;
     })[]
   >;
 
-  getQtyCheesecakes(overrides?: CallOverrides): Promise<BigNumber>;
+  getCakeCount(
+    overrides?: CallOverrides
+  ): Promise<[BigNumber, BigNumber, BigNumber]>;
 
   owner(overrides?: CallOverrides): Promise<string>;
 
   sendCheesecake(
     _message: string,
     _name: string,
-    _cakeSize: string,
-    _payAmountInWei: BigNumberish,
+    _cakeSize: BigNumberish,
     overrides?: PayableOverrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
   throwError(overrides?: CallOverrides): Promise<void>;
 
   callStatic: {
-    getAllDonations(
+    getAllCheesecakes(
       overrides?: CallOverrides
     ): Promise<
-      ([string, string, string, string, BigNumber] & {
+      ([string, string, BigNumber, string, BigNumber] & {
         name: string;
         message: string;
-        cakeSize: string;
+        cakeSize: BigNumber;
         giver: string;
         timestamp: BigNumber;
       })[]
     >;
 
-    getQtyCheesecakes(overrides?: CallOverrides): Promise<BigNumber>;
+    getCakeCount(
+      overrides?: CallOverrides
+    ): Promise<[BigNumber, BigNumber, BigNumber]>;
 
     owner(overrides?: CallOverrides): Promise<string>;
 
     sendCheesecake(
       _message: string,
       _name: string,
-      _cakeSize: string,
-      _payAmountInWei: BigNumberish,
+      _cakeSize: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -206,18 +209,18 @@ export class CheesecakePortal extends BaseContract {
   };
 
   filters: {
-    "NewCheesecake(string,string,string,address,uint256)"(
+    "NewCheesecake(string,string,uint256,address,uint256)"(
       name?: null,
       message?: null,
       cakeSize?: null,
       from?: string | null,
       timestamp?: null
     ): TypedEventFilter<
-      [string, string, string, string, BigNumber],
+      [string, string, BigNumber, string, BigNumber],
       {
         name: string;
         message: string;
-        cakeSize: string;
+        cakeSize: BigNumber;
         from: string;
         timestamp: BigNumber;
       }
@@ -230,11 +233,11 @@ export class CheesecakePortal extends BaseContract {
       from?: string | null,
       timestamp?: null
     ): TypedEventFilter<
-      [string, string, string, string, BigNumber],
+      [string, string, BigNumber, string, BigNumber],
       {
         name: string;
         message: string;
-        cakeSize: string;
+        cakeSize: BigNumber;
         from: string;
         timestamp: BigNumber;
       }
@@ -242,17 +245,16 @@ export class CheesecakePortal extends BaseContract {
   };
 
   estimateGas: {
-    getAllDonations(overrides?: CallOverrides): Promise<BigNumber>;
+    getAllCheesecakes(overrides?: CallOverrides): Promise<BigNumber>;
 
-    getQtyCheesecakes(overrides?: CallOverrides): Promise<BigNumber>;
+    getCakeCount(overrides?: CallOverrides): Promise<BigNumber>;
 
     owner(overrides?: CallOverrides): Promise<BigNumber>;
 
     sendCheesecake(
       _message: string,
       _name: string,
-      _cakeSize: string,
-      _payAmountInWei: BigNumberish,
+      _cakeSize: BigNumberish,
       overrides?: PayableOverrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
@@ -260,17 +262,16 @@ export class CheesecakePortal extends BaseContract {
   };
 
   populateTransaction: {
-    getAllDonations(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    getAllCheesecakes(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    getQtyCheesecakes(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    getCakeCount(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     sendCheesecake(
       _message: string,
       _name: string,
-      _cakeSize: string,
-      _payAmountInWei: BigNumberish,
+      _cakeSize: BigNumberish,
       overrides?: PayableOverrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 

@@ -44,7 +44,14 @@ const CakeOrderSheet = ({ sendCheesecake, isLoading }: Props) => {
     register,
     control,
     formState: { errors },
-  } = useForm<Inputs>()
+    reset,
+  } = useForm<Inputs>({
+    defaultValues: {
+      message: '',
+      name: '',
+      cakeSize: 'small',
+    },
+  })
 
   const {
     field: radioField,
@@ -70,13 +77,12 @@ const CakeOrderSheet = ({ sendCheesecake, isLoading }: Props) => {
     },
   })
 
-  const onSubmit: SubmitHandler<Inputs> = (data) => {
-    console.log('onsubmit')
-    if (isLoading) {
-      console.log('is Loading')
-      return
-    }
-    sendCheesecake(data.cakeSize, data.name, data.message)
+  const onSubmit: SubmitHandler<Inputs> = async (data) => {
+    await sendCheesecake(data.cakeSize, data.name, data.message)
+    reset({
+      message: '',
+      name: '',
+    })
   }
   return (
     <form onSubmit={handleSubmit(onSubmit)}>

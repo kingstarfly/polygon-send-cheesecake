@@ -30,8 +30,11 @@ const config: HardhatUserConfig = {
   },
   defaultNetwork: "hardhat",
   networks: {
+    localhost: {
+      chainId: 1337,
+    },
     hardhat: {
-      chainId: 31337,
+      chainId: 1337, // This is because MetaMask mistakenly assumes all networks in http://localhost:8545 to have a chain id of 1337 - https://hardhat.org/metamask-issue.html
     },
     mumbai: {
       url: process.env.MUMBAI_ALCHEMY_URL,
