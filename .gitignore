@@ -44,3 +44,6 @@ packages/frontend/out/
 packages/frontend/build
 # contracts
 # packages/frontend/artifacts/*
+
+## Typescript ##
+*.tsbuildinfo
