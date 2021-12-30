@@ -5,11 +5,12 @@ I'm a hungry student with a great love for cheesecakes. Send me MATIC tokens to 
 
 ## Live Website
 
-TBC
+[Take me there!](https://polygon-send-cheesecake.pages.dev/)
 
 
 ## Tech used
 
+- Monorepo architecture - Yarn workspaces
 - Smart contract - Solidity, Hardhat, Typechain
 - Frontend - Nextjs with Typescript, ChakraUI, useDapp (EthersJS), React Hook Form
 - Deployment: Cloudfare Pages

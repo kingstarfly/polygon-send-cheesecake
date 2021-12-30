@@ -38,8 +38,13 @@ const config: HardhatUserConfig = {
     },
     mumbai: {
       url: process.env.MUMBAI_ALCHEMY_URL,
-      accounts: [`0x${process.env.PRIVATE_KEY}`],
+      accounts: [`0x${process.env.PRIVATE_KEY_DEV1}`],
       chainId: 80001,
+    },
+    polygon: {
+      url: process.env.POLYGON_ALCHEMY_URL,
+      accounts: [`0x${process.env.PRIVATE_KEY_MAIN}`],
+      chainId: 137,
     },
   },
   typechain: {

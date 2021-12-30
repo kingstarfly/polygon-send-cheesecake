@@ -18,7 +18,7 @@ import { CakeSize } from 'components/CakeSizeChoice'
  */
 
 const MUMBAI_CONTRACT_ADDRESS = '0x9BcD660f618cD943ba82FEFF939d90F14Af39f16'
-const POLYGON_CONTRACT_ADDRESS = 'TBC' // todo
+const POLYGON_CONTRACT_ADDRESS = '0x836c4ae077061155337be5E427DF8b65c4d056Bf'
 
 function HomeIndex(): JSX.Element {
   const [isLoading, setIsLoading] = React.useState(false)
