@@ -1,4 +1,4 @@
-import { AspectRatio, Flex, Heading, VStack } from '@chakra-ui/react'
+import { AspectRatio, Flex, Heading, useToast, VStack } from '@chakra-ui/react'
 import { ethers } from 'ethers'
 import React from 'react'
 import { CheesecakePortalContract as LOCAL_CONTRACT_ADDRESS } from '../artifacts/contracts/contractAddress'
@@ -25,6 +25,7 @@ function HomeIndex(): JSX.Element {
   const [donations, setDonations] = React.useState<Donation[]>([])
 
   const { account, chainId, library } = useEthers()
+  const toast = useToast()
 
   const CONTRACT_ADDRESS = React.useMemo(() => {
     switch (chainId) {
@@ -37,7 +38,7 @@ function HomeIndex(): JSX.Element {
       default:
         return LOCAL_CONTRACT_ADDRESS
     }
-  }, [ChainId, account])
+  }, [chainId, account])
 
   const contract = React.useMemo(() => {
     if (!library) {
@@ -72,7 +73,7 @@ function HomeIndex(): JSX.Element {
         console.log(err)
       }
     }
-  }, [contract, setDonations])
+  }, [contract, setDonations, library])
 
   async function sendCheesecake(
     cakeSize: CakeSize,
@@ -81,6 +82,7 @@ function HomeIndex(): JSX.Element {
   ) {
     if (library) {
       setIsLoading(true)
+
       let ethersAmount: number
       let cakeCountIndex: number
       switch (cakeSize) {
@@ -109,12 +111,33 @@ function HomeIndex(): JSX.Element {
             value: ethers.utils.parseEther(ethersAmount.toString()),
           }
         )
+
+        // Add loading donation item
+        setDonations((old) => [
+          {
+            timestamp: ethers.BigNumber.from(
+              Math.floor(new Date().getTime() / 1000)
+            ),
+            giver: account,
+            isLoading: true,
+          },
+          ...old,
+        ])
         await transaction.wait()
-        await fetchAllDonations()
       } catch (error) {
         console.error(error)
+        if ((error?.data?.message as string).includes('insufficient funds')) {
+          toast({
+            title: 'Error encountered',
+            description: 'You have insufficient funds!',
+            status: 'error',
+            duration: 2000,
+            isClosable: true,
+          })
+        }
       }
 
+      await fetchAllDonations()
       setIsLoading(false)
     }
   }
@@ -146,6 +169,7 @@ function HomeIndex(): JSX.Element {
         justifyContent="space-around"
         alignItems="center"
         maxWidth="container.lg"
+        height="80vh"
       >
         {/* Form */}
         <CakeOrderSheet sendCheesecake={sendCheesecake} isLoading={isLoading} />
@@ -153,13 +177,14 @@ function HomeIndex(): JSX.Element {
         <VStack
           spacing={0}
           pl={2}
-          maxHeight="50vh"
+          height="full"
           overflowY="auto"
           alignItems="flex-start"
         >
           {donations.map((donation, index) => (
             <DonationItem key={index} item={donation} />
           ))}
+          <DonationItem />
         </VStack>
       </Flex>
     </Layout>
